@@ -1,33 +1,40 @@
 const express = require("express");
-const { connectToMongoDB } = require("./connect");
+const mongoose = require("mongoose");
 const urlRoute = require("./routes/url");
 const URL = require("./models/url");
+require("dotenv").config();
 
 const app = express();
-const PORT = 8001;
+const PORT = process.env.PORT || 8001;
 
-connectToMongoDB("mongodb://localhost:27017/zippo").then(() =>
-  console.log("MongoDb connected"),
-);
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch((err) => console.log(err));
+
 app.use(express.json());
 
 app.use("/url", urlRoute);
-app.use("/:shortID", async (req, res) => {
-  const shortID = req.params.shortID;
-
-  const entry = await URL.findOneAndUpdate(
-    { shortID: shortID },
-    {
-      $push: {
-        visitHistory: { timestamp: Date.now() },
+app.get("/:shortId", async (req, res) => {
+  try {
+    const shortId = req.params.shortId;
+    const entry = await URL.findOneAndUpdate(
+      { shortId: shortId },
+      {
+        $push: {
+          visitHistory: { timestamp: Date.now() },
+        },
+        $inc: { totalClicks: 1 },
       },
-      $inc: { totalClicks: 1 },
-    },
-  );
+      { returnDocument: "after" },
+    );
 
-  if (!entry) return res.status(404).send("URL not found");
+    if (!entry) return res.status(404).send("URL not found");
 
-  res.redirect(entry.redirectURL);
+    res.redirect(entry.redirectURL);
+  } catch (err) {
+    res.status(500).send("Server error");
+  }
 });
 
 app.listen(PORT, () => console.log(`Server Started at PORT:${PORT}`));
