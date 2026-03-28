@@ -1,5 +1,5 @@
 const shortid = require("shortid");
-const URL = require("../models/url");
+const URL = require("../models/urlModel.js");
 
 async function handleGenerateNewShortURL(req, res) {
   try {
@@ -11,14 +11,17 @@ async function handleGenerateNewShortURL(req, res) {
 
     const shortId = shortid.generate();
 
-    await URL.create({
+    const newEntry = await URL.create({
       shortId: shortId,
       redirectURL: body.url,
       visitHistory: [],
     });
+    console.log("Created: ", newEntry);
 
     return res.json({ id: shortId });
   } catch (err) {
+    console.log("ERROR:", err);
+
     return res.status(500).json({ error: "Server error" });
   }
 }

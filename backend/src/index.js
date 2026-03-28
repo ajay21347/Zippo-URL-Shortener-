@@ -1,20 +1,34 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const urlRoute = require("./routes/url");
-const URL = require("./models/url");
+const cors = require("cors");
 require("dotenv").config();
 
-const app = express();
-const PORT = process.env.PORT || 8001;
+const urlRoute = require("./routes/urlRoutes.js");
+const URL = require("./models/urlModel.js");
 
+const app = express();
+
+//middleware
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+  }),
+);
+
+app.use(express.json());
+
+//DB Connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log(err));
 
-app.use(express.json());
-
+// routes
 app.use("/url", urlRoute);
+
+//redirect route
 app.get("/:shortId", async (req, res) => {
   try {
     const shortId = req.params.shortId;
@@ -36,5 +50,8 @@ app.get("/:shortId", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+// start server
+const PORT = process.env.PORT || 8001;
 
 app.listen(PORT, () => console.log(`Server Started at PORT:${PORT}`));
