@@ -18,7 +18,7 @@ async function handleGenerateNewShortURL(req, res) {
     });
     console.log("Created: ", newEntry);
 
-    return res.json({ id: shortId });
+    return res.json({ shortId: shortId });
   } catch (err) {
     console.log("ERROR:", err);
 
