@@ -7,6 +7,7 @@ export default function UrlShortener() {
   const [loading, setLoading] = useState(false);
   const [dark, setDark] = useState(false);
   const [analytics, setAnalytics] = useState(false);
+  const BASE_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -16,7 +17,7 @@ export default function UrlShortener() {
     if (!url) return toast.error("Enter a URL");
     try {
       setLoading(true);
-      const res = await fetch(`http://localhost:8001/url`, {
+      const res = await fetch(`${BASE_URL}/url`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -25,10 +26,10 @@ export default function UrlShortener() {
       });
 
       const data = await res.json();
-      setShortUrl(`http://localhost:8001/${data.id}`);
+      setShortUrl(`${BASE_URL}/${data.id}`);
       toast.success("Short URL created!");
-    } catch (err) {
-      toast.error("Something went wrong");
+    } catch (error) {
+      toast.error("Something went wrong:", error);
     } finally {
       setLoading(false);
     }
@@ -42,7 +43,7 @@ export default function UrlShortener() {
   const getAnalytics = async () => {
     try {
       const id = shortUrl.split("/").pop();
-      const res = await fetch(`http://localhost:8001/url/analytics/${id}`);
+      const res = await fetch(`${BASE_URL}/url/analytics/${id}`);
       const data = await res.json();
       setAnalytics(data);
     } catch (err) {

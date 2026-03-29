@@ -11,7 +11,7 @@ const app = express();
 //middleware
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://zippo-url-shortener.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type"],
   }),
